@@ -1,6 +1,9 @@
 package ru.netology.web.test;
 
 import lombok.val;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import ru.netology.web.data.DataHelper;
 import ru.netology.web.page.LoginPage;
@@ -14,28 +17,37 @@ public class LoginTest {
 
     private final DataHelper dataHelper = new DataHelper();
 
+    @AfterAll
+    static void clearDataBase(){
+
+        DataHelper.clearDB();
+
+    }
+
     @Test
-    void shouldLoginUser() throws SQLException {
+    void shouldLoginUser() {
 
         open("http://localhost:9999");
         val loginPage = new LoginPage();
         val userInfo = dataHelper.getValidUserInfo(0);
         val verificationPage = loginPage.validLogin(userInfo);
         val verificationCode = dataHelper.getVerificationCodeFor(userInfo);
-        verificationPage.validVerify(verificationCode);
+        val dashboardPage = verificationPage.validVerify(verificationCode);
+        assertTrue(dashboardPage.isDashboardPageOpen());
         dataHelper.clearVerificationCode(verificationCode);
 
     }
 
     @Test
-    void shouldLoginAnotherUser() throws SQLException {
+    void shouldLoginAnotherUser() {
 
         open("http://localhost:9999");
         val loginPage = new LoginPage();
         val userInfo = dataHelper.getValidUserInfo(1);
         val verificationPage = loginPage.validLogin(userInfo);
         val verificationCode = dataHelper.getVerificationCodeFor(userInfo);
-        verificationPage.validVerify(verificationCode);
+        val dashboardPage = verificationPage.validVerify(verificationCode);
+        assertTrue(dashboardPage.isDashboardPageOpen());
         dataHelper.clearVerificationCode(verificationCode);
 
     }
@@ -74,7 +86,7 @@ public class LoginTest {
     }
 
     @Test
-    void shouldAlertWhenWrongVerificationCode() throws SQLException {
+    void shouldAlertWhenWrongVerificationCode() {
 
         open("http://localhost:9999");
         val loginPage = new LoginPage();
@@ -88,7 +100,7 @@ public class LoginTest {
     }
 
     @Test
-    void shouldAlertWhenEmptyVerificationCode() throws SQLException {
+    void shouldAlertWhenEmptyVerificationCode() {
 
         open("http://localhost:9999");
         val loginPage = new LoginPage();

@@ -63,7 +63,7 @@ public class DataHelper {
 
     }
 
-    public String getVerificationCodeFor(UserInfo userInfo) throws SQLException {
+    public String getVerificationCodeFor(UserInfo userInfo) {
 
         val getUserIdSQL = "SELECT id FROM users WHERE login = ?";
         val getVerificationCodeSQL = "SELECT code FROM auth_codes WHERE user_id = ?";
@@ -74,13 +74,18 @@ public class DataHelper {
                         "jdbc:mysql://localhost:3306/app", "app", "pass"
                 );
         ) {
-          val userId = runner.query(conn, getUserIdSQL, new ScalarHandler<>(), userInfo.getLogin());
-          val verificationCode = runner.query(conn, getVerificationCodeSQL, new ScalarHandler<>(), userId);
-          return (String) verificationCode;
+            val userId = runner.query(conn, getUserIdSQL, new ScalarHandler<>(), userInfo.getLogin());
+            val verificationCode = runner.query(conn, getVerificationCodeSQL, new ScalarHandler<>(), userId);
+            return (String) verificationCode;
+        } catch (SQLException e) {
+            System.out.println("Ошибка доступа к базе данных");
+            System.out.println(e.getMessage());
         }
+        return null;
+
     }
 
-    public void clearVerificationCode(String code) throws SQLException {
+    public void clearVerificationCode(String code) {
 
         val clearAuthCodeTable = "DELETE FROM auth_codes WHERE code = ?";
         val runner = new QueryRunner();
@@ -91,6 +96,31 @@ public class DataHelper {
                 );
         ) {
             val rowUpdated = runner.update(conn, clearAuthCodeTable, code);
+        } catch (SQLException e) {
+            System.out.println("Ошибка доступа к базе данных");
+            System.out.println(e.getMessage());
         }
+    }
+
+    public static void clearDB() {
+
+        val clearCards = "DELETE FROM cards";
+        val clearAuthCodes = "DELETE FROM auth_codes";
+        val clearUsers = "DELETE FROM users";
+        val runner = new QueryRunner();
+
+        try (
+                val conn = DriverManager.getConnection(
+                        "jdbc:mysql://localhost:3306/app", "app", "pass"
+                );
+        ) {
+            int rowUpdated = runner.update(conn, clearCards);
+            rowUpdated = runner.update(conn, clearAuthCodes);
+            rowUpdated = runner.update(conn, clearUsers);
+        } catch (SQLException e) {
+            System.out.println("Ошибка доступа к базе данных");
+            System.out.println(e.getMessage());
+        }
+
     }
 }
