@@ -66,7 +66,7 @@ public class DataHelper {
     public String getVerificationCodeFor(UserInfo userInfo) {
 
         val getUserIdSQL = "SELECT id FROM users WHERE login = ?";
-        val getVerificationCodeSQL = "SELECT code FROM auth_codes WHERE user_id = ?";
+        val getVerificationCodeSQL = "SELECT code FROM auth_codes WHERE user_id = ? ORDER BY created DESC LIMIT 1";
         val runner = new QueryRunner();
 
         try (
@@ -81,7 +81,7 @@ public class DataHelper {
             System.out.println("Ошибка доступа к базе данных");
             System.out.println(e.getMessage());
         }
-        return null;
+        return "Что-то пошло не так!";
 
     }
 
